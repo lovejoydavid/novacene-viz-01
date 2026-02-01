@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The AI Power Wall: Inference Economics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Palette - 'Electric Novacene' */
+        :root {
+            --bg-primary: #0f172a; /* Slate 900 */
+            --bg-card: #1e293b; /* Slate 800 */
+            --text-main: #f8fafc; /* Slate 50 */
+            --text-muted: #94a3b8; /* Slate 400 */
+            --accent-cyan: #22d3ee; /* Cyan 400 */
+            --accent-pink: #f472b6; /* Pink 400 */
+            --accent-purple: #a78bfa; /* Violet 400 */
+            --accent-green: #34d399; /* Emerald 400 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+        }
+
+        /* Chart Container Styling - Mandatory Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Constraint */
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px; /* Base height */
+            max-height: 400px; /* Max height cap */
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Timeline Styling (CSS only, no SVG) */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-purple));
+            transform: translateX(-50%);
+        }
+        
+        .timeline-node {
+            width: 16px;
+            height: 16px;
+            background-color: var(--bg-primary);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* Utility for vibrant text */
+        .text-gradient {
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <!-- 
+    SOURCE MATERIAL ANALYSIS & PLAN:
+    1. Narrative: The "Novacene" implies a hyper-technological era. The report focuses on the collision between AI scaling and physical physics (power/heat). 
+    2. Sections:
+       - Executive Summary: The "Power Wall" thesis.
+       - Trend: Energy Demand vs Grid Supply (Line Chart).
+       - Economics: Where the dollar goes in a data center (Doughnut).
+       - Geopolitics: Regional Analysis (Radar).
+       - Timeline: The shift from Chip constraints to Energy constraints.
+    3. Palette: Selected "Electric Novacene" (Slate 900 bg with Neon Cyan/Pink/Purple) to feel "Bloomberg for the future".
+    4. NO SVG/Mermaid: Using CSS shapes for timeline and Chart.js for all data.
+    -->
+</head>
+<body class="antialiased selection:bg-cyan-500 selection:text-white pb-20">
+
+    <!-- Header Section -->
+    <header class="w-full bg-slate-800 border-b border-slate-700 py-12 px-4 shadow-lg mb-8">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="inline-block bg-cyan-900/30 text-cyan-300 px-3 py-1 rounded-full text-xs font-semibold tracking-wider mb-4 border border-cyan-500/30">
+                MARKET INTELLIGENCE • Q1 2026
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
+                AI Inference <span class="text-gradient">Economics</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 font-light max-w-3xl mx-auto">
+                Meeting the "Power Wall": Who wins when compute becomes a constrained commodity?
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+
+        <!-- Executive Summary Card (Full Width) -->
+        <div class="md:col-span-12 bg-slate-800 rounded-xl p-8 shadow-xl border border-slate-700">
+            <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyan-400 pl-4">Executive Briefing</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900/50 p-6 rounded-lg border border-slate-700/50">
+                    <div class="text-4xl font-bold text-cyan-400 mb-2">3.5x</div>
+                    <p class="text-sm text-slate-400">Increase in Data Center energy demand by 2030 (Base Case).</p>
+                </div>
+                <div class="bg-slate-900/50 p-6 rounded-lg border border-slate-700/50">
+                    <div class="text-4xl font-bold text-pink-400 mb-2">$0.08</div>
+                    <p class="text-sm text-slate-400">Target Inference Cost per 1M Tokens for viable mass adoption.</p>
+                </div>
+                <div class="bg-slate-900/50 p-6 rounded-lg border border-slate-700/50">
+                    <div class="text-4xl font-bold text-purple-400 mb-2">18-24mo</div>
+                    <p class="text-sm text-slate-400">Time until "Power Availability" surpasses "Chip Availability" as the primary bottleneck.</p>
+                </div>
+            </div>
+            <p class="mt-6 text-slate-300 leading-relaxed">
+                We are entering a phase shift in the Novacene economy. While 2023-2025 was defined by the scramble for silicon (GPUs), the 2026-2030 horizon will be defined by the scramble for <strong>electrons</strong>. As model parameter counts explode, the marginal cost of intelligence is no longer just about hardware amortization—it is becoming a direct function of energy arbitrage and thermal management.
+            </p>
+        </div>
+
+        <!-- Section 1: The Energy Gap (Line Chart) -->
+        <div class="md:col-span-8 bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-2xl mr-2">⚡</span> The Energy Gap (2024-2030)
+                </h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Projected AI power consumption vs. committed grid expansion capacity in major hubs (US/EU). Note the divergence starting in late 2026.
+                </p>
+            </div>
+            <div class="flex-grow flex items-center justify-center w-full">
+                <!-- CHART CONTAINER 1 -->
+                <div class="chart-container">
+                    <canvas id="energyGapChart"></canvas>
+                </div>
+            </div>
+            <div class="mt-4 text-xs text-slate-500 italic text-center">
+                Source: Aggregated Utility Filings & Hardware Roadmaps
+            </div>
+        </div>
+
+        <!-- Section 2: Cost Composition (Doughnut Chart) -->
+        <div class="md:col-span-4 bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-2xl mr-2">💰</span> The Inference Dollar
+                </h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Shift in TCO (Total Cost of Ownership) for large-scale inference clusters. Energy and Cooling now rival Hardware costs.
+                </p>
+            </div>
+            <div class="flex-grow flex items-center justify-center w-full">
+                <!-- CHART CONTAINER 2 -->
+                <div class="chart-container">
+                    <canvas id="costBreakdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Regional Analysis (Radar Chart) -->
+        <div class="md:col-span-6 bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-2xl mr-2">🌐</span> Regional Power Dynamics
+                </h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Comparative advantage analysis. The US leads in talent, but Emerging Markets (e.g., Malaysia, Middle East) offer superior energy arbitrage.
+                </p>
+            </div>
+            <div class="chart-container">
+                <canvas id="regionalRadarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 4: The Hardware Crunch Timeline (HTML/CSS) -->
+        <div class="md:col-span-6 bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700 overflow-hidden">
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-2xl mr-2">⏳</span> The Bottleneck Shift
+                </h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Critical phases in the AI supply chain. We are currently transitioning from Phase 1 to Phase 2.
+                </p>
+            </div>
+            
+            <div class="relative h-[300px] w-full overflow-y-auto pr-2">
+                <!-- Vertical Line -->
+                <div class="timeline-line bg-slate-600"></div>
+
+                <!-- Item 1 -->
+                <div class="relative pl-[55%] pb-8 group">
+                    <div class="timeline-node bg-slate-900 border-cyan-400 top-2"></div>
+                    <div class="text-xs text-cyan-400 font-bold absolute left-[50%] -translate-x-[140%] top-2 w-[40%] text-right">2023 - 2024</div>
+                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+                        <h4 class="font-bold text-white text-sm">The Silicon Squeeze</h4>
+                        <p class="text-xs text-slate-300 mt-1">Constraint: H100 Availability. Prices skyrocket due to fab capacity limits.</p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="relative pr-[55%] pb-8 text-right group">
+                    <div class="timeline-node bg-slate-900 border-pink-400 top-2"></div>
+                    <div class="text-xs text-pink-400 font-bold absolute left-[50%] translate-x-[40%] top-2 w-[40%] text-left">2025 - 2026</div>
+                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+                        <h4 class="font-bold text-white text-sm">The Power Wall</h4>
+                        <p class="text-xs text-slate-300 mt-1">Constraint: Transformer availability. Datacenters wait 18mo for grid hookups.</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="relative pl-[55%] pb-8 group">
+                    <div class="timeline-node bg-slate-900 border-purple-400 top-2"></div>
+                    <div class="text-xs text-purple-400 font-bold absolute left-[50%] -translate-x-[140%] top-2 w-[40%] text-right">2027+</div>
+                    <div class="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+                        <h4 class="font-bold text-white text-sm">Thermodynamic Limits</h4>
+                        <p class="text-xs text-slate-300 mt-1">Constraint: Heat Rejection. Liquid cooling becomes mandatory standard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Efficiency Frontier (Scatter Plot) -->
+        <div class="md:col-span-12 bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <span class="text-2xl mr-2">🎯</span> The Efficiency Frontier
+                </h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Model Performance (MMLU Score) vs. Energy Consumption (Joules/Token). The goal is to move to the top-left (High Intelligence, Low Energy).
+                </p>
+            </div>
+            <div class="chart-container">
+                <canvas id="efficiencyChart"></canvas>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div class="bg-slate-900/50 p-4 rounded border border-slate-700 text-xs">
+                    <strong class="text-cyan-400 block mb-1">Observation 1</strong>
+                    Small Language Models (SLMs) are rapidly approaching the performance of 2023 giants at 1/100th the energy cost.
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded border border-slate-700 text-xs">
+                    <strong class="text-pink-400 block mb-1">Observation 2</strong>
+                    Frontier models show diminishing returns: 10x more energy for 2% gain in reasoning.
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded border border-slate-700 text-xs">
+                    <strong class="text-purple-400 block mb-1">Observation 3</strong>
+                    Specialized hardware (ASICs) provides the only viable path to break the linear energy scaling law.
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="md:col-span-12 text-center py-8">
+            <h4 class="text-2xl font-bold text-white mb-2">Recommendation for Operators</h4>
+            <p class="text-slate-400 max-w-2xl mx-auto">
+                Secure power contracts now. Invest in specialized inference chips (ASICs/LPU). Geographic diversification is no longer optional—it is a survival imperative.
+            </p>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 mt-12 text-center text-slate-600 text-sm">
+        <p>&copy; 2026 Novacene Intelligence Group. All rights reserved.</p>
+        <p class="mt-2 text-xs">Generated for visualization purposes based on "Bloomberg for the Novacene" prompt.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Label Wrapping Logic (Mandatory) ---
+        function wrapLabel(str, maxChars) {
+            if (str.length <= maxChars) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + 1 + words[i].length <= maxChars) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- 2. Tooltip Configuration (Mandatory) ---
+        const commonTooltipOptions = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            },
+            backgroundColor: 'rgba(15, 23, 42, 0.9)', // Slate 900
+            titleColor: '#f8fafc',
+            bodyColor: '#94a3b8',
+            borderColor: '#334155',
+            borderWidth: 1,
+            padding: 12
+        };
+
+        // --- 3. Chart Generation ---
+
+        // Chart 1: The Energy Gap (Line)
+        const ctxEnergy = document.getElementById('energyGapChart').getContext('2d');
+        const labelsEnergy = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+        new Chart(ctxEnergy, {
+            type: 'line',
+            data: {
+                labels: labelsEnergy,
+                datasets: [
+                    {
+                        label: 'AI Energy Demand (GW)',
+                        data: [15, 22, 35, 55, 85, 120, 160, 210],
+                        borderColor: '#f472b6', // Pink
+                        backgroundColor: 'rgba(244, 114, 182, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'Grid Capacity Growth (GW)',
+                        data: [20, 25, 30, 35, 40, 45, 50, 55],
+                        borderColor: '#34d399', // Green
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.1,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipOptions,
+                    legend: { labels: { color: '#94a3b8' } }
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Gigawatts (GW)', color: '#64748b' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Cost Composition (Doughnut)
+        const ctxCost = document.getElementById('costBreakdownChart').getContext('2d');
+        const rawLabelsCost = [
+            'Hardware Amortization (GPUs)', 
+            'Energy & Electricity', 
+            'Cooling Infrastructure', 
+            'Real Estate & Operations'
+        ];
+        // Apply wrapLabel
+        const labelsCost = rawLabelsCost.map(l => wrapLabel(l, 16));
+
+        new Chart(ctxCost, {
+            type: 'doughnut',
+            data: {
+                labels: labelsCost,
+                datasets: [{
+                    data: [35, 40, 15, 10], // Hypothetical 2026 scenario
+                    backgroundColor: [
+                        '#a78bfa', // Purple (Hardware)
+                        '#22d3ee', // Cyan (Energy - High!)
+                        '#34d399', // Green (Cooling)
+                        '#94a3b8'  // Gray (Other)
+                    ],
+                    borderColor: '#1e293b',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipOptions,
+                    legend: { 
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Regional Radar
+        const ctxRadar = document.getElementById('regionalRadarChart').getContext('2d');
+        const labelsRadar = ['Energy Cost', 'Grid Stability', 'Regulatory Ease', 'Talent Pool', 'Capital Access'];
+        
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: labelsRadar,
+                datasets: [
+                    {
+                        label: 'United States',
+                        data: [4, 8, 5, 10, 10], // High talent/cap, exp energy
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                    },
+                    {
+                        label: 'EU Zone',
+                        data: [3, 7, 2, 8, 7], // Reg heavy, high energy
+                        borderColor: '#a78bfa',
+                        backgroundColor: 'rgba(167, 139, 250, 0.2)',
+                    },
+                    {
+                        label: 'Emerging (SEA)',
+                        data: [9, 5, 8, 4, 6], // Cheap energy, low reg
+                        borderColor: '#f472b6',
+                        backgroundColor: 'rgba(244, 114, 182, 0.2)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#334155' },
+                        grid: { color: '#334155' },
+                        pointLabels: { color: '#cbd5e1', font: { size: 11 } },
+                        ticks: { display: false, backdropColor: 'transparent' }
+                    }
+                },
+                plugins: {
+                    tooltip: commonTooltipOptions,
+                    legend: { labels: { color: '#94a3b8' } }
+                }
+            }
+        });
+
+        // Chart 4: Efficiency Frontier (Scatter)
+        const ctxScatter = document.getElementById('efficiencyChart').getContext('2d');
+        
+        // Data format: x = Energy (Joules/Token), y = Intelligence (MMLU)
+        const scatterData = {
+            datasets: [
+                {
+                    label: 'Legacy Giants (2023)',
+                    data: [{x: 50, y: 70}, {x: 80, y: 85}, {x: 100, y: 90}],
+                    backgroundColor: '#94a3b8', // Gray
+                    radius: 8
+                },
+                {
+                    label: 'Current Frontier (2025)',
+                    data: [{x: 40, y: 88}, {x: 60, y: 92}, {x: 75, y: 95}],
+                    backgroundColor: '#a78bfa', // Purple
+                    radius: 6
+                },
+                {
+                    label: 'Efficient Architectures (Novacene)',
+                    data: [{x: 5, y: 80}, {x: 10, y: 87}, {x: 15, y: 91}],
+                    backgroundColor: '#34d399', // Green (Goal state)
+                    radius: 6
+                }
+            ]
+        };
+
+        new Chart(ctxScatter, {
+            type: 'scatter',
+            data: scatterData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipOptions,
+                    legend: { labels: { color: '#94a3b8' } }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Energy Cost (Joules per Token)', color: '#64748b' },
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Intelligence Score (MMLU)', color: '#64748b' },
+                        grid: { color: '#334155' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+    </script>
+    
+    <!-- NO SVG OR MERMAID USED. ICONS ARE UNICODE OR CSS SHAPES. -->
+</body>
+</html>
