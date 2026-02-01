@@ -393,24 +393,17 @@
                     borderWidth: 2
                 }]
             },
-        options: {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    tooltip: commonTooltipOptions,
-    legend: {
-      position: "right",
-      align: "start",
-      labels: {
-        color: "#94a3b8",
-        font: { size: 10 },
-        boxWidth: 14,
-        boxHeight: 14,
-        padding: 14
-      }
-    }
-  }
-}
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipOptions,
+                    legend: { 
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', font: { size: 10 } }
+                    }
+                }
+            }
         });
 
         // Chart 3: Regional Radar
