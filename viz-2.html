@@ -387,23 +387,24 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- UPDATE: Changed to 3 columns to fit Moat Analyzer -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Ask Vera Card -->
                 <div class="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
                     <h4 class="font-bold text-lg mb-2 flex items-center gap-2">
                         <span>✨ Ask Vera</span>
                         <span class="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-normal">Analyst Chat</span>
                     </h4>
-                    <p class="text-sm text-gray-400 mb-4">
-                        Query the desk note directly. Ask about specific risks, regulatory outcomes, or data nuances.
+                    <p class="text-sm text-gray-400 mb-4 h-12">
+                        Query the desk note directly. Ask about specific risks or data nuances.
                     </p>
                     <div class="space-y-4">
-                        <textarea id="vera-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-blue transition-colors" placeholder="E.g., What happens to stablecoin margins if the Fed cuts rates to 2%?"></textarea>
+                        <textarea id="vera-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-blue transition-colors" placeholder="E.g., What happens if Fed cuts rates to 2%?"></textarea>
                         <button onclick="handleAskVera()" id="vera-btn" class="w-full bg-vera-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                             <span>Analyze</span>
                         </button>
                     </div>
-                    <div id="vera-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                    <div id="vera-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5 max-h-40 overflow-y-auto">
                         <!-- Response goes here -->
                     </div>
                 </div>
@@ -414,16 +415,36 @@
                         <span>✨ Macro Stress Test</span>
                         <span class="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-normal">Scenario Sim</span>
                     </h4>
-                    <p class="text-sm text-gray-400 mb-4">
-                        Input a market event to simulate its impact on the four rails and deposit flight risk.
+                    <p class="text-sm text-gray-400 mb-4 h-12">
+                        Input a market event to simulate its impact on rails & deposit flight.
                     </p>
                     <div class="space-y-4">
-                        <textarea id="stress-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-orange transition-colors" placeholder="E.g., SEC classifies all stablecoins as securities."></textarea>
+                        <textarea id="stress-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-orange transition-colors" placeholder="E.g., SEC classifies stablecoins as securities."></textarea>
                         <button onclick="handleStressTest()" id="stress-btn" class="w-full bg-vera-orange hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                             <span>Run Simulation</span>
                         </button>
                     </div>
-                    <div id="stress-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                    <div id="stress-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5 max-h-40 overflow-y-auto">
+                        <!-- Response goes here -->
+                    </div>
+                </div>
+
+                <!-- NEW: Moat Analyzer Card -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                    <h4 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <span>✨ Moat Analyzer</span>
+                        <span class="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-normal">Strategy Check</span>
+                    </h4>
+                    <p class="text-sm text-gray-400 mb-4 h-12">
+                        Describe a fintech strategy. Vera will pressure test it against the report's Moat Logic.
+                    </p>
+                    <div class="space-y-4">
+                        <textarea id="moat-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-green transition-colors" placeholder="E.g., A neobank issuing a yield-bearing stablecoin for gig workers."></textarea>
+                        <button onclick="handleMoatAnalyzer()" id="moat-btn" class="w-full bg-vera-green hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <span>Pressure Test</span>
+                        </button>
+                    </div>
+                    <div id="moat-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5 max-h-40 overflow-y-auto">
                         <!-- Response goes here -->
                     </div>
                 </div>
@@ -502,6 +523,7 @@
         - Deposit Risk: 'Transaction Balances' move to stablecoins for payments. 'Corporate Cash' moves to Tokenized T-Bills for yield.
         - Issuer Economics: Highly sensitive to Fed Funds Rate. Lower rates = lower margin, forcing move to fees.
         - Scenarios: Base Case (Parallel Rails - 60%), Bull Case (Corporate Standard - 25%), Bear Case (Regulatory Capture - 15%).
+        - Moat Logic: Issuers have Trust Moat (Liquidity). Wallets have Distribution Moat (UX). Compliance has Regulatory Moat.
         
         Tone: Professional, succinct, slightly cynical, focused on risk and incentives. Use markdown for bolding key terms.`;
 
@@ -513,11 +535,14 @@
             
             if (isLoading) {
                 btn.disabled = true;
-                btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+                const originalText = btn.innerHTML;
+                btn.setAttribute('data-original', originalText);
+                btn.innerHTML = '<div class="spinner"></div> Working...';
                 output.classList.add('hidden');
                 output.innerHTML = '';
             } else {
                 btn.disabled = false;
+                // btn.innerHTML = btn.getAttribute('data-original'); // Don't reset immediately to avoid flicker if caller does it
                 output.classList.remove('hidden');
             }
         }
@@ -535,7 +560,7 @@
                 
                 const btn = document.getElementById('vera-btn');
                 btn.innerHTML = '<span>Analyze</span>';
-                setLoading('vera-btn', 'vera-output', false); // Restores visibility
+                setLoading('vera-btn', 'vera-output', false); 
                 
                 document.getElementById('vera-output').innerHTML = `
                     <div class="font-mono text-xs text-vera-blue mb-2 uppercase">Vera's Note:</div>
@@ -580,6 +605,41 @@
                 setLoading('stress-btn', 'stress-output', false);
                 document.getElementById('stress-output').innerHTML = '<span class="text-red-400">Connection error. Please try again.</span>';
                 document.getElementById('stress-btn').innerHTML = '<span>Run Simulation</span>';
+            }
+        }
+
+        async function handleMoatAnalyzer() {
+            const input = document.getElementById('moat-input');
+            const strategy = input.value.trim();
+            if (!strategy) return;
+
+            setLoading('moat-btn', 'moat-output', true);
+
+            const moatPrompt = `Analyze this strategy: "${strategy}".
+            Assess it against the 'Moat Logic' in the report (Distribution vs Trust vs Regulatory Moats).
+            Format:
+            1. **Moat Check**: Does it own Distro, Trust, or Compliance?
+            2. **The Flaw**: What is the most obvious point of failure?
+            3. **Verdict**: Will it survive? (Yes/No/Pivot).
+            Keep it brutal and evidence-based.`;
+
+            try {
+                const response = await callGemini(moatPrompt, VERA_SYSTEM_PROMPT);
+                const formatted = marked.parse(response);
+                
+                const btn = document.getElementById('moat-btn');
+                btn.innerHTML = '<span>Pressure Test</span>';
+                setLoading('moat-btn', 'moat-output', false);
+
+                document.getElementById('moat-output').innerHTML = `
+                    <div class="font-mono text-xs text-vera-green mb-2 uppercase">Strategy Audit:</div>
+                    ${formatted}
+                `;
+            } catch (error) {
+                console.error(error);
+                setLoading('moat-btn', 'moat-output', false);
+                document.getElementById('moat-output').innerHTML = '<span class="text-red-400">Connection error. Please try again.</span>';
+                document.getElementById('moat-btn').innerHTML = '<span>Pressure Test</span>';
             }
         }
 
