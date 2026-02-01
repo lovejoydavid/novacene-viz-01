@@ -1,0 +1,662 @@
+<!-- Chosen Palette: "Institutional Trust" - Deep Slate (#1e293b), Warm Gray (#f3f4f6), and Signal Blue (#2563eb) for data, with Alert Amber (#d97706) for risks. High contrast, serious, legible. -->
+
+<!-- Application Structure Plan: 
+    1. **Header/Nav**: Persistent navigation to switch between the logical "layers" of the report (Executive Brief, Strategy/Manticus, Evidence/Vera, Action/Darśan).
+    2. **Executive Dashboard (Home)**: The "One Page" view. high-level thesis, key timeline visualization, and current probability mass of scenarios.
+    3. **Strategy Core (Manticus)**: Deep text analysis with interactive "Markov Blanket" diagram (HTML/CSS) and Incentives breakdown.
+    4. **Evidence & Scenarios (Vera)**: Data-heavy section. Charts for leading indicators, probability cones, and falsification criteria.
+    5. **Risk & Readiness**: The operational tools. Interactive Risk Register (filterable table) and Readiness Scorecard.
+    6. **Action Policy**: A checklist/decision matrix for the user's next 90 days/12 months.
+    
+    *Rationale*: Executives need to toggle between the "Big Picture" (Dashboard), the "Why" (Strategy), and the "What Now" (Action). Linear scrolling is replaced by functional tab navigation to respect the user's attention economy.
+-->
+
+<!-- Visualization & Content Choices:
+    1. **Scenario Probabilities (Chart.js Line)**: Shows the evolution of 3 scenarios (Smooth, Fragmented, Crisis) over the 2026-2036 window. *Goal*: Visualize uncertainty. *Interaction*: Hover for details.
+    2. **Migration Spend Projection (Chart.js Doughnut)**: Breakdown of Capex vs Opex. *Goal*: Economics.
+    3. **Risk Register (HTML Table + JS Filter)**: *Goal*: Operationalize the threat landscape. *Interaction*: Filter by "Banking" or "Crypto" to reduce noise.
+    4. **The Migration Window (HTML/CSS Timeline)**: *Goal*: Show sequencing of NIST standards vs. Hardware cycles. *Interaction*: Scroll/Highlight.
+    5. **Readiness Radar (Chart.js Radar)**: Compare Banking vs. Crypto across 5 axes (Agility, Governance, Capital, Talent, Regs).
+    
+    *Confirmation*: NO SVG used. NO Mermaid JS used. All diagrams are CSS/HTML or Chart.js Canvas.
+-->
+
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP1 Desk Note: Post-Quantum Transition Risk</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts: Inter (UI) and Merriweather (Long form) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Font Assignments */
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .prose-text { font-family: 'Merriweather', serif; line-height: 1.8; }
+        
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width for large screens */
+            margin: 0 auto;   /* Center horizontally */
+            height: 300px;    /* Default mobile height */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        /* Tab Interaction Styles */
+        .tab-btn.active {
+            border-bottom: 2px solid #2563eb; /* Signal Blue */
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        .tab-btn {
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            color: #1e3a8a;
+        }
+
+        /* Custom Scrollbar for Risk Table */
+        .risk-table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .risk-table-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-slate-50">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold tracking-tight text-slate-900">FP1 <span class="text-blue-600">Desk Note</span></span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8" id="desktop-nav">
+                        <!-- Nav items injected by JS -->
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">Ref: PQ-2026-TR</span>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Nav Placeholder -->
+        <div class="sm:hidden bg-slate-50 border-t border-slate-200 flex justify-around p-2 text-xs" id="mobile-nav">
+             <!-- Mobile items injected by JS -->
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- SECTION 1: EXECUTIVE BRIEF (Dashboard) -->
+        <section id="sec-brief" class="space-y-8 animate-fade-in">
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-l-4 border-blue-600 pl-4 mb-6">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Post-Quantum Transition Risk</h1>
+                    <p class="text-lg text-slate-600 font-medium">Pricing the Coordination Failure, Not the Apocalypse</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Thesis Column -->
+                    <div class="lg:col-span-2 prose-text text-slate-700">
+                        <p class="mb-4">
+                            <span class="font-bold text-slate-900">SHARP THESIS:</span> Post-quantum transition risk is primarily a coordination, governance, and balance-sheet event, not a sudden cryptographic apocalypse. The disruptive period is the <span class="bg-yellow-100 px-1 rounded">Migration Window (2026–2036)</span>, where uncertainty, uneven readiness, and interoperability failures create operational risk and market repricing.
+                        </p>
+                        <p class="mb-4">
+                            We are exiting the era of "cryptographic stability" and entering a decade of forced agility. For banks, this is a capex super-cycle. For crypto, it is an existential governance test.
+                        </p>
+                        
+                        <!-- Key Stats Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 not-prose">
+                            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Est. Global Spend</div>
+                                <div class="text-xl font-bold text-blue-700">$2.4T</div>
+                                <div class="text-xs text-slate-400">By 2035 (Direct + Indirect)</div>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Critical Window</div>
+                                <div class="text-xl font-bold text-amber-600">2026-2030</div>
+                                <div class="text-xs text-slate-400">High Fragility Period</div>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">NIST Standards</div>
+                                <div class="text-xl font-bold text-slate-700">Finalized</div>
+                                <div class="text-xs text-slate-400">ML-KEM / ML-DSA (2024)</div>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Attack Vector</div>
+                                <div class="text-xl font-bold text-red-600">SNDL</div>
+                                <div class="text-xs text-slate-400">Store Now, Decrypt Later</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Column: Scenario Probabilities -->
+                    <div class="bg-slate-50 rounded p-4 border border-slate-200 flex flex-col justify-center">
+                        <h3 class="text-sm font-semibold text-slate-700 mb-2 text-center">Probability Mass: The Next Decade</h3>
+                        <div class="chart-container">
+                            <canvas id="scenarioChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-slate-500 mt-2">Source: FP1 Vera Model (Consensus Estimates)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Migration Timeline -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">The Migration Window: Sequencing the Risk</h3>
+                <div class="relative pt-6 pb-2 overflow-x-auto">
+                    <div class="min-w-[700px] flex justify-between items-start border-t-2 border-slate-200 relative" id="timeline-container">
+                        <!-- Timeline Items Injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: STRATEGY DEEP DIVE (Manticus) -->
+        <section id="sec-strategy" class="hidden space-y-8 animate-fade-in">
+            <div class="bg-slate-900 text-white rounded-lg p-6 sm:p-8 shadow-md">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="px-2 py-1 bg-blue-600 text-xs font-bold rounded text-white">MANTICUS</span>
+                    <h2 class="text-xl font-mono font-semibold">Strategic Orientation & Incentives</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 prose-text">
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-400 mb-2">The Coordination Trap</h3>
+                        <p class="text-slate-300 text-sm mb-4">
+                            The transition is not a technical upgrade; it is a prisoner's dilemma. If Bank A upgrades its HSMs (Hardware Security Modules) to Quantum-Resistant standards, but the Correspondent Banking Network (Swift ecosystem) delays, Bank A incurs Capex without risk reduction.
+                        </p>
+                        <p class="text-slate-300 text-sm">
+                            In Crypto, the coordination cost is explicit: <strong class="text-white">Governance Tokens</strong>. Upgrading Ethereum or Bitcoin signatures requires a hard fork or complex soft fork. This creates a "Schelling Point" for dissent. We expect forks, value bleed, and a "flight to quality" where users migrate to chains that ship upgrades first.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-400 mb-2">The "Trust Premium"</h3>
+                        <p class="text-slate-300 text-sm mb-4">
+                            By 2028, "Quantum Readiness" will become a tier-1 marketing asset for custodians (Coinbase, Fireblocks) and Transaction Banks (JPM, BNY). 
+                        </p>
+                        <p class="text-slate-300 text-sm">
+                            <strong class="text-white">Prediction:</strong> Capital Requirements (Basel IV amendments) will eventually penalize non-PQC (Post-Quantum Cryptography) compliant assets. This reprices the cost of funding for lagging banks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-6">Market Architecture: Where the Breaks Happen</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="border border-slate-200 rounded p-4 hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">🏦</div>
+                        <h4 class="font-bold text-slate-800">Banking Rails</h4>
+                        <p class="text-sm text-slate-600 mt-2">
+                            <strong>Choke Point:</strong> ISO 20022 message extensions and legacy Mainframe COBOL cores.
+                        </p>
+                        <div class="mt-3 text-xs bg-red-50 text-red-700 p-2 rounded">
+                            <strong>Risk:</strong> "Zombie" encrypted data (SNDL) leaks historic wire details.
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="border border-slate-200 rounded p-4 hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">🔗</div>
+                        <h4 class="font-bold text-slate-800">Crypto L1s</h4>
+                        <p class="text-sm text-slate-600 mt-2">
+                            <strong>Choke Point:</strong> Signature size bloat. Dilithium/Sphincs+ keys are larger than ECDSA.
+                        </p>
+                        <div class="mt-3 text-xs bg-amber-50 text-amber-700 p-2 rounded">
+                            <strong>Risk:</strong> Gas costs spike 5-10x for PQC txns, pricing out users.
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="border border-slate-200 rounded p-4 hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">☁️</div>
+                        <h4 class="font-bold text-slate-800">Infrastructure</h4>
+                        <p class="text-sm text-slate-600 mt-2">
+                            <strong>Choke Point:</strong> Third-party vendor concentration (AWS KMS, Azure HSM).
+                        </p>
+                        <div class="mt-3 text-xs bg-blue-50 text-blue-700 p-2 rounded">
+                            <strong>Risk:</strong> Waitlists for compliant hardware (HSMs) create bottlenecks.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EVIDENCE & SCENARIOS (Vera) -->
+        <section id="sec-evidence" class="hidden space-y-8 animate-fade-in">
+             <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span class="px-2 py-1 bg-emerald-600 text-xs font-bold rounded text-white">VERA</span>
+                    <h2 class="text-xl font-bold text-slate-900">Evidence & Scenario Modeling</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Radar Chart: Readiness -->
+                    <div>
+                         <h3 class="text-sm font-semibold text-slate-700 mb-4 text-center">Readiness Gap: Banking vs. Crypto</h3>
+                         <div class="chart-container">
+                             <canvas id="radarChart"></canvas>
+                         </div>
+                         <div class="mt-4 text-xs text-slate-500 prose-text">
+                             <strong>Analysis:</strong> Banks lead in Capital and Regulation but lag severely in Agility. Crypto protocols have high Agility (software upgrades) but suffer from Governance paralysis and lack of Regulatory clarity on PQC standards.
+                         </div>
+                    </div>
+
+                    <!-- Falsification Criteria List -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-700 mb-4">Falsification Criteria (Leading Indicators)</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start p-3 bg-slate-50 rounded border border-slate-100">
+                                <span class="text-blue-600 font-bold mr-3">01</span>
+                                <div class="text-sm text-slate-700">
+                                    <strong>Indicator:</strong> NIST 4th Round Finalization.
+                                    <br><span class="text-xs text-slate-500">Updates probability of "Smooth Handoff" if BIKE/HQC standardized by mid-2025.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-3 bg-slate-50 rounded border border-slate-100">
+                                <span class="text-blue-600 font-bold mr-3">02</span>
+                                <div class="text-sm text-slate-700">
+                                    <strong>Indicator:</strong> Logical Qubit Milestone (Error Correction).
+                                    <br><span class="text-xs text-slate-500">If Google/IBM demo >100 logical qubits before 2027, "Crisis" probability jumps +30%.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-3 bg-slate-50 rounded border border-slate-100">
+                                <span class="text-blue-600 font-bold mr-3">03</span>
+                                <div class="text-sm text-slate-700">
+                                    <strong>Indicator:</strong> Ethereum PQC EIP Inclusion.
+                                    <br><span class="text-xs text-slate-500">Absence of a PQC abstraction layer EIP by 2026 indicates "Fragmented Panic".</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spend Breakdown -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">The Cost of Transition (Who Captures Value?)</h3>
+                 <div class="flex flex-col md:flex-row items-center justify-around">
+                     <div class="w-full md:w-1/2 p-4">
+                         <div class="chart-container" style="max-height: 300px;">
+                             <canvas id="spendChart"></canvas>
+                         </div>
+                     </div>
+                     <div class="w-full md:w-1/2 p-4 prose-text text-sm text-slate-600">
+                         <p class="mb-2"><strong>Infra & Hardware (40%):</strong> HSM replacements (Thales, Entrust), Cloud KMS upgrades (AWS, Google), and fiber line encryption.</p>
+                         <p class="mb-2"><strong>Consulting & Audit (30%):</strong> Big 4 readiness assessments, cryptographic inventory mapping.</p>
+                         <p><strong>Talent (20%):</strong> Skyrocketing salaries for cryptographers and legacy system architects.</p>
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: RISK REGISTER & ACTION (Darśan/Ops) -->
+        <section id="sec-risk" class="hidden space-y-8 animate-fade-in">
+            
+            <!-- Risk Register Tool -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-[600px]">
+                <div class="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Operational Risk Register</h2>
+                        <p class="text-sm text-slate-500">Filterable database of specific transition vulnerabilities.</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="filterRisk('all')" class="px-3 py-1 text-xs font-medium rounded bg-slate-200 hover:bg-slate-300 text-slate-800 transition">All</button>
+                        <button onclick="filterRisk('Banking')" class="px-3 py-1 text-xs font-medium rounded bg-blue-100 hover:bg-blue-200 text-blue-800 transition">Banking</button>
+                        <button onclick="filterRisk('Crypto')" class="px-3 py-1 text-xs font-medium rounded bg-amber-100 hover:bg-amber-200 text-amber-800 transition">Crypto</button>
+                    </div>
+                </div>
+                
+                <div class="flex-grow overflow-auto risk-table-container p-0">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Sector</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Risk Vector</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mechanism</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mitigation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200" id="risk-table-body">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Policy -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 sm:p-8">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span class="px-2 py-1 bg-purple-700 text-xs font-bold rounded text-white">DARŚAN</span>
+                    <h2 class="text-xl font-bold text-slate-900">Action Policy: Agency & Responsibility</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- No Regret -->
+                    <div class="bg-white p-5 rounded shadow-sm border-t-4 border-emerald-500">
+                        <h4 class="font-bold text-slate-900 mb-2">No-Regret Moves</h4>
+                        <p class="text-xs text-slate-500 mb-4 uppercase">Execute Now (0-6 Months)</p>
+                        <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                            <li><strong>Crypto-Inventory:</strong> Map every key, cert, and algorithm in your stack. You cannot upgrade what you cannot see.</li>
+                            <li><strong>SNDL Audit:</strong> Identify data with >7 year shelf life. Encrypt it with hybrid modes now.</li>
+                            <li><strong>Vendor Covenants:</strong> Add PQC clauses to all new SaaS/Cloud contracts.</li>
+                        </ul>
+                    </div>
+                    <!-- Conditional -->
+                    <div class="bg-white p-5 rounded shadow-sm border-t-4 border-amber-500">
+                        <h4 class="font-bold text-slate-900 mb-2">Conditional Bets</h4>
+                        <p class="text-xs text-slate-500 mb-4 uppercase">Prepare (6-18 Months)</p>
+                        <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                            <li><strong>Crypto-Agility Pilots:</strong> If you are a bank, pilot a PQC TLS connection with a partner.</li>
+                            <li><strong>Treasury Diversification:</strong> If stablecoin issuer, hold reserves in PQC-native custody when available.</li>
+                        </ul>
+                    </div>
+                    <!-- High Conviction -->
+                    <div class="bg-white p-5 rounded shadow-sm border-t-4 border-red-500">
+                        <h4 class="font-bold text-slate-900 mb-2">High-Conviction</h4>
+                        <p class="text-xs text-slate-500 mb-4 uppercase">Strategy (18-36 Months)</p>
+                        <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                            <li><strong>De-Risking:</strong> Exit vendors who fail 2026 PQC milestones.</li>
+                            <li><strong>New Products:</strong> Launch "Quantum-Safe" custody accounts to capture institutional flows (The Trust Premium).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="mb-2 text-sm">First Principles First (FP1) • Decision Grade Research</p>
+            <p class="text-xs text-slate-600">Disclaimer: This desk note is for informational purposes only. It simulates a strategic advisory report.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORE ---
+        const scenarioData = {
+            labels: ['2026', '2028', '2030', '2032', '2034', '2036'],
+            datasets: [
+                {
+                    label: 'Smooth Handoff (Optimistic)',
+                    data: [10, 15, 20, 30, 40, 50],
+                    borderColor: '#10b981', // Emerald
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Fragmented Panic (Base Case)',
+                    data: [60, 65, 55, 45, 35, 30],
+                    borderColor: '#f59e0b', // Amber
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Systemic Crisis (Pessimistic)',
+                    data: [30, 20, 25, 25, 25, 20],
+                    borderColor: '#ef4444', // Red
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        };
+
+        const riskRegistry = [
+            { sector: 'Banking', vector: 'Store Now Decrypt Later (SNDL)', mechanism: 'Adversaries harvest encrypted traffic today to decrypt in 2030.', mitigation: 'Hybrid Key Exchange (classical + PQC) immediately.' },
+            { sector: 'Crypto', vector: 'L1 Governance Gridlock', mechanism: 'Token holders vote down upgrades due to high gas costs/larger sigs.', mitigation: 'Abstracted Account innovation (ERC-4337) to hide complexity.' },
+            { sector: 'Infra', vector: 'HSM Supply Chain', mechanism: 'Thales/Entrust backlogs of 18+ months for Q-safe hardware.', mitigation: 'Pre-order hardware; Virtual HSM redundancy.' },
+            { sector: 'Banking', vector: 'Vendor Concentration', mechanism: 'Core banking provider (e.g., Fiserv) delays patch.', mitigation: 'Contractual penalty clauses; Multi-vendor strategy.' },
+            { sector: 'Crypto', vector: 'Wallet Fragmentation', mechanism: 'Users lose funds migrating from ECDSA to Dilithium addresses.', mitigation: 'Automated, subsidized migration smart contracts.' },
+            { sector: 'Banking', vector: 'Authentication Decay', mechanism: 'PKI roots of trust compromised, faking identity.', mitigation: 'Short-lived certificates; Zero Trust Architecture.' },
+            { sector: 'Infra', vector: 'Root Certificate Expiry', mechanism: 'Global roots need re-signing with larger keys.', mitigation: 'Coordinated root key ceremonies (IANA/CA/Browser Forum).' },
+            { sector: 'Crypto', vector: 'Bridge Vulnerability', mechanism: 'Cross-chain bridges fail to upgrade multisigs in sync.', mitigation: 'Eliminate trusted bridges; use ZK-light clients (PQC compliant).' }
+        ];
+
+        const radarData = {
+            labels: ['Agility', 'Governance Speed', 'Capital Available', 'Talent Density', 'Regulatory Clarity'],
+            datasets: [
+                {
+                    label: 'Global Banks',
+                    data: [20, 30, 90, 60, 80],
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)', // Blue
+                    borderColor: '#2563eb',
+                    pointBackgroundColor: '#2563eb',
+                },
+                {
+                    label: 'Crypto Protocols',
+                    data: [80, 40, 50, 90, 20],
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)', // Amber
+                    borderColor: '#f59e0b',
+                    pointBackgroundColor: '#f59e0b',
+                }
+            ]
+        };
+
+        const timelineEvents = [
+            { year: '2024', label: 'NIST Final', desc: 'ML-KEM/DSA Standards Released' },
+            { year: '2026', label: 'Start', desc: 'Migration Window Opens. Early adopters move.' },
+            { year: '2028', label: 'Hardware', desc: 'New HSM Cycle hits banks.' },
+            { year: '2030', label: 'Risk Peak', desc: 'SNDL Decryption window enters danger zone.' },
+            { year: '2033', label: 'Legacy Ban', desc: 'Browsers/Regulators deprecate RSA-2048.' },
+            { year: '2035', label: 'Done', desc: 'Migration Window Closes.' }
+        ];
+
+        // --- UI LOGIC ---
+
+        function initApp() {
+            renderNav();
+            renderTimeline();
+            renderRiskTable(riskRegistry); // Initial render all
+            initCharts();
+            
+            // Default to first tab
+            switchTab('brief');
+        }
+
+        const tabs = [
+            { id: 'brief', label: 'Executive Brief' },
+            { id: 'strategy', label: 'Strategy (Manticus)' },
+            { id: 'evidence', label: 'Evidence (Vera)' },
+            { id: 'risk', label: 'Risk & Action' }
+        ];
+
+        function renderNav() {
+            const deskNav = document.getElementById('desktop-nav');
+            const mobNav = document.getElementById('mobile-nav');
+            
+            tabs.forEach(tab => {
+                // Desktop
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn border-transparent border-b-2 text-sm font-medium px-1 pt-1 inline-flex items-center';
+                btn.textContent = tab.label;
+                btn.dataset.tab = tab.id;
+                btn.onclick = () => switchTab(tab.id);
+                deskNav.appendChild(btn);
+
+                // Mobile
+                const mBtn = document.createElement('button');
+                mBtn.className = 'tab-btn text-center';
+                mBtn.textContent = tab.label.split(' ')[0]; // Shorten for mobile
+                mBtn.dataset.tab = tab.id;
+                mBtn.onclick = () => switchTab(tab.id);
+                mobNav.appendChild(mBtn);
+            });
+        }
+
+        function switchTab(tabId) {
+            // Update Visibility
+            ['sec-brief', 'sec-strategy', 'sec-evidence', 'sec-risk'].forEach(id => {
+                const el = document.getElementById(id);
+                if (id === `sec-${tabId}`) {
+                    el.classList.remove('hidden');
+                    // Trigger Chart resize if needed when unhiding
+                    if(tabId === 'brief') Chart.getChart('scenarioChart')?.resize();
+                    if(tabId === 'evidence') {
+                        Chart.getChart('radarChart')?.resize();
+                        Chart.getChart('spendChart')?.resize();
+                    }
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            // Update Nav State
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if(btn.dataset.tab === tabId) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            
+            // Scroll to top
+            window.scrollTo(0,0);
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            timelineEvents.forEach((evt, index) => {
+                const el = document.createElement('div');
+                el.className = 'flex flex-col items-center relative';
+                // Line dot
+                el.innerHTML = `
+                    <div class="w-4 h-4 rounded-full ${index === 0 || index === 5 ? 'bg-blue-600' : 'bg-slate-400'} border-2 border-white -mt-2.5 z-10"></div>
+                    <div class="mt-2 text-center w-24">
+                        <div class="text-sm font-bold text-slate-800">${evt.year}</div>
+                        <div class="text-xs font-semibold text-blue-700">${evt.label}</div>
+                        <div class="text-[10px] text-slate-500 leading-tight mt-1">${evt.desc}</div>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function renderRiskTable(data) {
+            const tbody = document.getElementById('risk-table-body');
+            tbody.innerHTML = '';
+            
+            data.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                
+                // Styling badges for sectors
+                let badgeClass = 'bg-slate-100 text-slate-800';
+                if(row.sector === 'Banking') badgeClass = 'bg-blue-100 text-blue-800';
+                if(row.sector === 'Crypto') badgeClass = 'bg-amber-100 text-amber-800';
+                if(row.sector === 'Infra') badgeClass = 'bg-purple-100 text-purple-800';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeClass}">${row.sector}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${row.vector}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">${row.mechanism}</td>
+                    <td class="px-6 py-4 text-sm text-slate-600 border-l border-slate-100">${row.mitigation}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterRisk(category) {
+            if(category === 'all') {
+                renderRiskTable(riskRegistry);
+            } else {
+                const filtered = riskRegistry.filter(r => r.sector === category);
+                renderRiskTable(filtered);
+            }
+        }
+
+        function initCharts() {
+            // 1. Scenario Chart (Line)
+            const ctxScenario = document.getElementById('scenarioChart').getContext('2d');
+            new Chart(ctxScenario, {
+                type: 'line',
+                data: scenarioData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100,
+                            title: { display: true, text: 'Probability (%)' }
+                        }
+                    }
+                }
+            });
+
+            // 2. Readiness Radar
+            const ctxRadar = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctxRadar, {
+                type: 'radar',
+                data: radarData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 3. Spend Breakdown (Doughnut)
+            const ctxSpend = document.getElementById('spendChart').getContext('2d');
+            new Chart(ctxSpend, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Infrastructure & Hardware', 'Consulting & Audit', 'Talent & Hiring', 'Software/Licensing'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: ['#1e3a8a', '#3b82f6', '#93c5fd', '#dbeafe']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
