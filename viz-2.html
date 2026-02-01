@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Re-Plumbing of Banking: Stablecoins & Tokenized Treasuries</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vera-navy': '#0f172a',
+                        'vera-blue': '#3b82f6',
+                        'vera-orange': '#f97316',
+                        'vera-green': '#10b981',
+                        'vera-gray': '#f1f5f9',
+                        'vera-card': '#ffffff',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        /* Custom Scrollbar for "Desk Report" feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; 
+            border-radius: 4px;
+        }
+        .section-header {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        /* Grid Diagram Styling */
+        .rail-col {
+            transition: all 0.3s ease;
+        }
+        .rail-col:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        /* Markdown Styles for LLM Output */
+        .prose-sm p { margin-bottom: 0.75em; }
+        .prose-sm ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.75em; }
+        .prose-sm strong { font-weight: 700; color: #0f172a; }
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header / Memo Top -->
+    <header class="bg-vera-navy text-white p-8 border-b-4 border-vera-orange">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold font-sans tracking-tight mb-2">The Re-Plumbing of Banking</h1>
+                <h2 class="text-xl text-vera-blue font-mono">Stablecoins & Tokenized Treasuries</h2>
+                <p class="mt-4 text-gray-400 text-sm font-mono uppercase tracking-widest">
+                    Source: Vera | Decision Grade Desk Note | Status: High Confidence
+                </p>
+            </div>
+            <div class="md:text-right flex flex-col justify-center">
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20 inline-block">
+                    <span class="block text-gray-400 text-xs font-mono mb-1">CORE THESIS</span>
+                    <p class="text-white font-semibold leading-tight">
+                        Stablecoin issuers are becoming shadow banks by capturing payments float and settlement optionality. The contest is between "Payment Deposits" and "Yield Deposits."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-12">
+
+        <!-- SECTION 1: THE PLUMBING MAP -->
+        <section id="plumbing-map">
+            <div class="section-header">
+                <h3 class="text-2xl font-bold text-vera-navy">1. The Plumbing Map: Four Rails Compared</h3>
+                <p class="text-gray-600 mt-1 max-w-3xl">
+                    We are witnessing a migration from fee-based value capture (Interchange) to float-based value capture (Net Interest Margin). The diagram below maps the structural shift across four competing architectures.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Rail A: Card/ACH -->
+                <div class="rail-col bg-white p-6 rounded-lg shadow-md border-t-4 border-gray-400 flex flex-col">
+                    <h4 class="font-bold text-lg mb-2 text-gray-700">A. Legacy (Card/ACH)</h4>
+                    <div class="text-xs font-mono text-gray-500 mb-4">BATCH SETTLEMENT</div>
+                    <ul class="space-y-3 flex-grow text-sm">
+                        <li class="flex items-start"><span class="mr-2 text-red-500 font-bold">×</span> <span class="text-gray-600">T+2 Settlement</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-green-500 font-bold">✓</span> <span class="text-gray-600">High Fraud Protection</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-blue-500 font-bold">ℹ</span> <span class="text-gray-600">Value Capture: Fees & Interchange</span></li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <span class="block text-xs font-bold text-gray-500 uppercase">Primary Risk</span>
+                        <span class="text-sm font-semibold text-vera-navy">Cost Compression</span>
+                    </div>
+                </div>
+
+                <!-- Rail B: RTP/FedNow -->
+                <div class="rail-col bg-white p-6 rounded-lg shadow-md border-t-4 border-vera-blue flex flex-col">
+                    <h4 class="font-bold text-lg mb-2 text-vera-blue">B. Bank Real-Time (RTP)</h4>
+                    <div class="text-xs font-mono text-gray-500 mb-4">INSTANT GROSS SETTLEMENT</div>
+                    <ul class="space-y-3 flex-grow text-sm">
+                        <li class="flex items-start"><span class="mr-2 text-green-500 font-bold">✓</span> <span class="text-gray-600">Instant Finality</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-red-500 font-bold">×</span> <span class="text-gray-600">Domestic Only (No FX)</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-blue-500 font-bold">ℹ</span> <span class="text-gray-600">Value Capture: Treasury Float</span></li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <span class="block text-xs font-bold text-gray-500 uppercase">Primary Risk</span>
+                        <span class="text-sm font-semibold text-vera-navy">UX Fragmentation</span>
+                    </div>
+                </div>
+
+                <!-- Rail C: Public Stablecoins -->
+                <div class="rail-col bg-white p-6 rounded-lg shadow-md border-t-4 border-vera-orange flex flex-col">
+                    <h4 class="font-bold text-lg mb-2 text-vera-orange">C. Public Stablecoins</h4>
+                    <div class="text-xs font-mono text-gray-500 mb-4">24/7 PROGRAMMABLE</div>
+                    <ul class="space-y-3 flex-grow text-sm">
+                        <li class="flex items-start"><span class="mr-2 text-green-500 font-bold">✓</span> <span class="text-gray-600">Global / Borderless</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-green-500 font-bold">✓</span> <span class="text-gray-600">Atomic Settlement</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-blue-500 font-bold">ℹ</span> <span class="text-gray-600">Value Capture: 100% Float (NIM)</span></li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <span class="block text-xs font-bold text-gray-500 uppercase">Primary Risk</span>
+                        <span class="text-sm font-semibold text-vera-navy">Regulatory Chokepoints</span>
+                    </div>
+                </div>
+
+                <!-- Rail D: Tokenized / Permissioned -->
+                <div class="rail-col bg-white p-6 rounded-lg shadow-md border-t-4 border-vera-green flex flex-col">
+                    <h4 class="font-bold text-lg mb-2 text-vera-green">D. Tokenized Treasuries</h4>
+                    <div class="text-xs font-mono text-gray-500 mb-4">YIELD BEARING</div>
+                    <ul class="space-y-3 flex-grow text-sm">
+                        <li class="flex items-start"><span class="mr-2 text-green-500 font-bold">✓</span> <span class="text-gray-600">Pass-through Yield</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-red-500 font-bold">×</span> <span class="text-gray-600">KYC/Walled Garden</span></li>
+                        <li class="flex items-start"><span class="mr-2 text-blue-500 font-bold">ℹ</span> <span class="text-gray-600">Value Capture: Mgmt Fees</span></li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <span class="block text-xs font-bold text-gray-500 uppercase">Primary Risk</span>
+                        <span class="text-sm font-semibold text-vera-navy">Securities Law</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DEPOSITS AT RISK -->
+        <section id="deposits-risk" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <h3 class="font-bold text-xl text-vera-navy mb-4">Disintermediation Risk Quantified</h3>
+                <p class="text-sm text-gray-600 mb-6">
+                    Not all deposits are equal. "Transaction Balances" (0% interest) are high risk for migration to Stablecoins (Payment functionality). "Corporate Cash" is high risk for migration to Tokenized T-Bills (Yield).
+                </p>
+                <!-- Chart Container -->
+                <div class="chart-container h-64">
+                    <canvas id="depositRiskChart"></canvas>
+                </div>
+                <div class="mt-4 text-xs text-center text-gray-500">
+                    *Estimates based on liquidity tiering and yield sensitivity.
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 flex flex-col justify-center">
+                <h4 class="font-mono text-sm text-vera-blue mb-2 font-bold uppercase">The Mechanic of Flight</h4>
+                <p class="text-gray-700 mb-4">
+                    For meaningful disintermediation to occur, the friction of on/off ramping must drop below the yield differential.
+                </p>
+                <div class="space-y-4">
+                    <div class="bg-vera-gray p-3 rounded border-l-4 border-vera-orange">
+                        <span class="block font-bold text-sm text-vera-navy">Operating Deposits</span>
+                        <span class="text-xs text-gray-600">Sticky due to deep integration with payroll and ERP systems. Hard to move.</span>
+                    </div>
+                    <div class="bg-vera-gray p-3 rounded border-l-4 border-vera-green">
+                        <span class="block font-bold text-sm text-vera-navy">Idle Corporate Treasury</span>
+                        <span class="text-xs text-gray-600">Highly mobile. Will move to Tokenized T-Bills if spread > 50bps net of risk.</span>
+                    </div>
+                    <div class="bg-vera-gray p-3 rounded border-l-4 border-vera-blue">
+                        <span class="block font-bold text-sm text-vera-navy">Cross-Border Payments</span>
+                        <span class="text-xs text-gray-600">Already moving. Stablecoins offer T+0 vs T+2 settlement + 1-2% FX savings.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: ISSUER ECONOMICS -->
+        <section id="issuer-economics">
+            <div class="section-header">
+                <h3 class="text-2xl font-bold text-vera-navy">3. The Float Trap: Issuer P&L Sensitivity</h3>
+                <p class="text-gray-600 mt-1">
+                    Stablecoin issuers (e.g., Tether, Circle) operate as narrow banks. Their profitability is correlated to the Fed Funds Rate. As rates cut, the "Free Float" model is pressured, forcing a pivot to transaction fees or lending.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="text-center">
+                        <span class="block text-sm text-gray-500">Current Yield (proxy)</span>
+                        <span class="block text-2xl font-bold text-vera-navy">4.50%</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-sm text-gray-500">Cost of Revenue</span>
+                        <span class="block text-2xl font-bold text-vera-green">~0.15%</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-sm text-gray-500">Net Margin</span>
+                        <span class="block text-2xl font-bold text-vera-blue">~96%</span>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="sensitivityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: MARKET SIZING & COMPETITIVE MAP -->
+        <section id="market-sizing" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <h3 class="font-bold text-xl text-vera-navy mb-4">Total Addressable Market (TAM)</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    The gap between current stablecoin supply and the addressable markets in B2B Payments and Corporate Treasury indicates massive growth potential, limited primarily by regulatory clarity.
+                </p>
+                <div class="chart-container">
+                    <canvas id="tamChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-vera-navy text-white rounded-xl shadow-sm p-6 border border-vera-blue">
+                <h3 class="font-bold text-xl mb-4 text-vera-blue">Moat Logic</h3>
+                <p class="text-sm text-gray-300 mb-6">
+                    Who wins? Value accrues to those who control distribution and compliance, not the plumbing itself.
+                </p>
+                
+                <ul class="space-y-6">
+                    <li>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm">Issuers</span>
+                            <span class="text-xs bg-vera-blue px-2 py-1 rounded text-white">Trust Moat</span>
+                        </div>
+                        <p class="text-xs text-gray-400">Winner takes most. Liquidity begets liquidity.</p>
+                    </li>
+                    <li>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm">Wallets / Neo-Banks</span>
+                            <span class="text-xs bg-vera-orange px-2 py-1 rounded text-white">Distro Moat</span>
+                        </div>
+                        <p class="text-xs text-gray-400">Control the user interface and last mile.</p>
+                    </li>
+                    <li>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm">Compliance Stack</span>
+                            <span class="text-xs bg-vera-green px-2 py-1 rounded text-white">Regulatory Moat</span>
+                        </div>
+                        <p class="text-xs text-gray-400">Identity, AML, and sanction screening infrastructure.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 5: SCENARIOS -->
+        <section id="scenarios">
+            <div class="section-header">
+                <h3 class="text-2xl font-bold text-vera-navy">5. Scenarios & Leading Indicators</h3>
+                <p class="text-gray-600 mt-1">
+                    Probabilistic outcomes for the next 18-24 months based on current regulatory and market vectors.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Base Case -->
+                <div class="bg-white rounded-lg p-6 shadow-md border-t-4 border-vera-blue">
+                    <div class="flex justify-between items-end mb-4">
+                        <h4 class="font-bold text-lg text-gray-800">Base Case</h4>
+                        <span class="text-2xl font-bold text-vera-blue">60%</span>
+                    </div>
+                    <p class="text-sm font-semibold mb-2">"Parallel Rails"</p>
+                    <p class="text-xs text-gray-600 mb-4">
+                        Stablecoins grow as dominant settlement rail for cross-border & crypto-native flows. Banks retain core operating deposits.
+                    </p>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="block text-xs font-bold text-gray-500 mb-1">LEADING INDICATORS</span>
+                        <ul class="text-xs space-y-1 list-disc list-inside text-gray-700">
+                            <li>Visa/Mastercard expand settlement pilots.</li>
+                            <li>Stablecoin legislation passes in US (narrow).</li>
+                            <li>Tether market share remains sticky.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bull Case -->
+                <div class="bg-white rounded-lg p-6 shadow-md border-t-4 border-vera-green">
+                    <div class="flex justify-between items-end mb-4">
+                        <h4 class="font-bold text-lg text-gray-800">Bull Case</h4>
+                        <span class="text-2xl font-bold text-vera-green">25%</span>
+                    </div>
+                    <p class="text-sm font-semibold mb-2">"Corporate Standard"</p>
+                    <p class="text-xs text-gray-600 mb-4">
+                        Fortune 500 treasurers adopt Tokenized T-Bills for cash mgmt. Stablecoins unbundle commercial banking.
+                    </p>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="block text-xs font-bold text-gray-500 mb-1">LEADING INDICATORS</span>
+                        <ul class="text-xs space-y-1 list-disc list-inside text-gray-700">
+                            <li>Major non-crypto fintech launches yield stablecoin.</li>
+                            <li>Clarification on SAB 121 (Custody rule).</li>
+                            <li>Tokenized T-Bills surpass $10B TVL.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bear Case -->
+                <div class="bg-white rounded-lg p-6 shadow-md border-t-4 border-vera-orange">
+                    <div class="flex justify-between items-end mb-4">
+                        <h4 class="font-bold text-lg text-gray-800">Bear Case</h4>
+                        <span class="text-2xl font-bold text-vera-orange">15%</span>
+                    </div>
+                    <p class="text-sm font-semibold mb-2">"Regulatory Capture"</p>
+                    <p class="text-xs text-gray-600 mb-4">
+                        Regulation forces stablecoins into bank-issued forms only. Innovation stifled; incumbents win.
+                    </p>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <span class="block text-xs font-bold text-gray-500 mb-1">LEADING INDICATORS</span>
+                        <ul class="text-xs space-y-1 list-disc list-inside text-gray-700">
+                            <li>Aggressive SEC enforcement against issuers.</li>
+                            <li>Fed blocks state-chartered trust access to master accounts.</li>
+                            <li>Basel III imposes punitive capital weights.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW SECTION: INTERACTIVE INTELLIGENCE (GEMINI API) -->
+        <section id="interactive-intelligence" class="bg-gradient-to-r from-vera-navy to-slate-800 rounded-xl p-8 shadow-xl border border-vera-blue/30 text-white">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-vera-blue/20 rounded-lg border border-vera-blue/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-vera-blue"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5c0-5.523 4.477-10 10-10z"/><path d="M8 12a2 2 0 1 0 2 2"/><path d="M14 12a2 2 0 1 0 2 2"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold">Interactive Intelligence</h3>
+                    <p class="text-vera-blue text-sm font-mono">POWERED BY GEMINI LLM</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Ask Vera Card -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                    <h4 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <span>✨ Ask Vera</span>
+                        <span class="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-normal">Analyst Chat</span>
+                    </h4>
+                    <p class="text-sm text-gray-400 mb-4">
+                        Query the desk note directly. Ask about specific risks, regulatory outcomes, or data nuances.
+                    </p>
+                    <div class="space-y-4">
+                        <textarea id="vera-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-blue transition-colors" placeholder="E.g., What happens to stablecoin margins if the Fed cuts rates to 2%?"></textarea>
+                        <button onclick="handleAskVera()" id="vera-btn" class="w-full bg-vera-blue hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <span>Analyze</span>
+                        </button>
+                    </div>
+                    <div id="vera-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                        <!-- Response goes here -->
+                    </div>
+                </div>
+
+                <!-- Stress Test Simulator Card -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                    <h4 class="font-bold text-lg mb-2 flex items-center gap-2">
+                        <span>✨ Macro Stress Test</span>
+                        <span class="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-normal">Scenario Sim</span>
+                    </h4>
+                    <p class="text-sm text-gray-400 mb-4">
+                        Input a market event to simulate its impact on the four rails and deposit flight risk.
+                    </p>
+                    <div class="space-y-4">
+                        <textarea id="stress-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-vera-orange transition-colors" placeholder="E.g., SEC classifies all stablecoins as securities."></textarea>
+                        <button onclick="handleStressTest()" id="stress-btn" class="w-full bg-vera-orange hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <span>Run Simulation</span>
+                        </button>
+                    </div>
+                    <div id="stress-output" class="mt-4 text-sm text-gray-300 prose-sm hidden bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                        <!-- Response goes here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTION POLICY -->
+        <section id="action-policy" class="bg-vera-navy text-white rounded-xl p-8 shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Action Policy</h3>
+                    <p class="text-gray-300 mb-4">
+                        For Founders & Strategy Leads:
+                    </p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center"><span class="bg-vera-blue w-2 h-2 rounded-full mr-2"></span>Build vertical-specific distribution (B2B, Remittance).</li>
+                        <li class="flex items-center"><span class="bg-vera-blue w-2 h-2 rounded-full mr-2"></span>Avoid pure "wrapper" plays; value is in the integration.</li>
+                        <li class="flex items-center"><span class="bg-vera-blue w-2 h-2 rounded-full mr-2"></span>Partner with qualified custodians immediately.</li>
+                    </ul>
+                </div>
+                <div class="md:text-right">
+                    <span class="block text-xs text-gray-400 font-mono mb-2">NEXT UPDATE TRIGGER</span>
+                    <p class="font-bold text-lg leading-snug text-vera-orange">
+                        Issuance of new OCC guidance on stablecoin interoperability OR significant shift in Fed Funds Rate expectations.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 py-8 mt-12 text-center text-xs text-gray-500">
+        <p>Generated by Vera & Canvas Infographics</p>
+        <p class="mt-2">No SVG or Mermaid.js used in this artifact.</p>
+    </footer>
+
+    <!-- Logic & API Integration -->
+    <script>
+        const apiKey = ""; // API Key injected at runtime
+
+        // --- GEMINI API HELPERS ---
+        async function callGemini(prompt, systemInstruction) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            
+            for (let i = 0; i < delays.length; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis available.";
+                } catch (e) {
+                    if (i === delays.length - 1) throw e;
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        }
+
+        const VERA_SYSTEM_PROMPT = `You are Vera. You are evidence-first, indicator-driven, and allergic to narrative gravity. You are an analyst writing a 'Decision Grade Desk Note'.
+        
+        CORE REPORT DATA TO REFERENCE:
+        - Thesis: Stablecoin issuers are shadow banks capturing payments float. 
+        - 4 Rails: Legacy (Card/ACH - Fees), RTP (Domestic - Treasury Float), Public Stablecoins (Global - 100% Float), Tokenized Treasuries (Yield).
+        - Deposit Risk: 'Transaction Balances' move to stablecoins for payments. 'Corporate Cash' moves to Tokenized T-Bills for yield.
+        - Issuer Economics: Highly sensitive to Fed Funds Rate. Lower rates = lower margin, forcing move to fees.
+        - Scenarios: Base Case (Parallel Rails - 60%), Bull Case (Corporate Standard - 25%), Bear Case (Regulatory Capture - 15%).
+        
+        Tone: Professional, succinct, slightly cynical, focused on risk and incentives. Use markdown for bolding key terms.`;
+
+        // --- UI HANDLERS ---
+
+        function setLoading(btnId, outputId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const output = document.getElementById(outputId);
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+                output.classList.add('hidden');
+                output.innerHTML = '';
+            } else {
+                btn.disabled = false;
+                output.classList.remove('hidden');
+            }
+        }
+
+        async function handleAskVera() {
+            const input = document.getElementById('vera-input');
+            const question = input.value.trim();
+            if (!question) return;
+
+            setLoading('vera-btn', 'vera-output', true);
+
+            try {
+                const response = await callGemini(question, VERA_SYSTEM_PROMPT);
+                const formatted = marked.parse(response);
+                
+                const btn = document.getElementById('vera-btn');
+                btn.innerHTML = '<span>Analyze</span>';
+                setLoading('vera-btn', 'vera-output', false); // Restores visibility
+                
+                document.getElementById('vera-output').innerHTML = `
+                    <div class="font-mono text-xs text-vera-blue mb-2 uppercase">Vera's Note:</div>
+                    ${formatted}
+                `;
+            } catch (error) {
+                console.error(error);
+                setLoading('vera-btn', 'vera-output', false);
+                document.getElementById('vera-output').innerHTML = '<span class="text-red-400">Connection error. Please try again.</span>';
+                document.getElementById('vera-btn').innerHTML = '<span>Analyze</span>';
+            }
+        }
+
+        async function handleStressTest() {
+            const input = document.getElementById('stress-input');
+            const event = input.value.trim();
+            if (!event) return;
+
+            setLoading('stress-btn', 'stress-output', true);
+
+            const stressPrompt = `Analyze the impact of this event: "${event}". 
+            Format the response as:
+            1. **Primary Impact**: 1 sentence summary.
+            2. **Rail Impact**: Which of the 4 rails gains/loses?
+            3. **Deposit Flight Probability**: Low/Med/High change.
+            4. **Vera's Verdict**: A cynical one-liner takeaway.`;
+
+            try {
+                const response = await callGemini(stressPrompt, VERA_SYSTEM_PROMPT);
+                const formatted = marked.parse(response);
+                
+                const btn = document.getElementById('stress-btn');
+                btn.innerHTML = '<span>Run Simulation</span>';
+                setLoading('stress-btn', 'stress-output', false);
+
+                document.getElementById('stress-output').innerHTML = `
+                    <div class="font-mono text-xs text-vera-orange mb-2 uppercase">Stress Test Results:</div>
+                    ${formatted}
+                `;
+            } catch (error) {
+                console.error(error);
+                setLoading('stress-btn', 'stress-output', false);
+                document.getElementById('stress-output').innerHTML = '<span class="text-red-400">Connection error. Please try again.</span>';
+                document.getElementById('stress-btn').innerHTML = '<span>Run Simulation</span>';
+            }
+        }
+
+        // --- CHART LOGIC (EXISTING) ---
+        function wrapLabels(labels) {
+            return labels.map(label => {
+                if (label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = words[0];
+                    for (let i = 1; i < words.length; i++) {
+                        if ((currentLine + ' ' + words[i]).length < 16) {
+                            currentLine += ' ' + words[i];
+                        } else {
+                            lines.push(currentLine);
+                            currentLine = words[i];
+                        }
+                    }
+                    lines.push(currentLine);
+                    return lines;
+                }
+                return label;
+            });
+        }
+
+        const tooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // 1. Deposit Risk Chart
+        const ctxRisk = document.getElementById('depositRiskChart').getContext('2d');
+        new Chart(ctxRisk, {
+            type: 'doughnut',
+            data: {
+                labels: wrapLabels(['Transaction Balances (High Risk)', 'Corporate Cash (Med Risk)', 'Retail Savings (Low Risk)', 'Operating Deposits (Low Risk)']),
+                datasets: [{
+                    data: [25, 30, 20, 25],
+                    backgroundColor: ['#f97316', '#3b82f6', '#10b981', '#0f172a'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12, usePointStyle: true } },
+                    tooltip: tooltipConfig,
+                    title: { display: true, text: 'Bank Deposit Composition by Flight Risk' }
+                }
+            }
+        });
+
+        // 2. Sensitivity Chart
+        const ctxSensitivity = document.getElementById('sensitivityChart').getContext('2d');
+        new Chart(ctxSensitivity, {
+            type: 'bar',
+            data: {
+                labels: ['0%', '1%', '2%', '3%', '4%', '5%'],
+                datasets: [
+                    {
+                        label: 'Issuer Revenue (Billions)',
+                        data: [0.5, 2.0, 4.0, 6.0, 8.0, 10.0],
+                        backgroundColor: '#3b82f6',
+                        yAxisID: 'y',
+                    },
+                    {
+                        type: 'line',
+                        label: 'Demand for Yield Product',
+                        data: [10, 20, 30, 60, 85, 95], // Higher rates = higher demand for T-Bills
+                        borderColor: '#f97316',
+                        borderWidth: 2,
+                        yAxisID: 'y1',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: tooltipConfig,
+                    title: { display: true, text: 'Impact of Fed Funds Rate on Float Revenue vs Demand' }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Fed Funds Rate' } },
+                    y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Revenue ($B)'} },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: {display: true, text: 'Yield Demand Index'} }
+                }
+            }
+        });
+
+        // 3. TAM Chart
+        const ctxTam = document.getElementById('tamChart').getContext('2d');
+        new Chart(ctxTam, {
+            type: 'bar',
+            data: {
+                labels: wrapLabels(['Current Stablecoin Supply', 'Cross-Border B2B Payments', 'Global Remittances', 'Corp Treasury (Offshore)', 'Tokenized T-Bills (Projected)']),
+                datasets: [{
+                    label: 'Market Volume ($ Billions)',
+                    data: [160, 35000, 800, 2000, 400], 
+                    backgroundColor: ['#10b981', '#0f172a', '#3b82f6', '#f97316', '#94a3b8']
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: tooltipConfig,
+                    legend: { display: false },
+                    title: { display: true, text: 'Current Supply vs Addressable Market Void' }
+                },
+                scales: {
+                    x: { type: 'logarithmic', title: {display: true, text: 'Volume (Log Scale)'} }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
